@@ -3,6 +3,7 @@ package com.pnc.izin;
 import com.pnc.izin.config.DatabaseHelper;
 import com.pnc.izin.dao.UserDAO;
 import com.pnc.izin.dao.IzinDAO;
+import com.pnc.izin.entity.Dosen;
 import com.pnc.izin.entity.IzinPenting;
 import com.pnc.izin.entity.IzinSakit;
 import com.pnc.izin.entity.Mahasiswa;
@@ -24,8 +25,8 @@ public class Main {
         while (isRunning) {
             System.out.println("\n===== SISTEM PENGAJUAN IZIN PNC =====");
             System.out.println("[1] Login Mahasiswa");
-            System.out.println("[2] Login Dosen (Coming Soon)");
-            System.out.println("[3] Login Admin (Coming Soon)");
+            System.out.println("[2] Login Dosen");
+            System.out.println("[3] Login Admin");
             System.out.println("[0] Keluar");
             System.out.print("Pilih menu: ");
 
@@ -37,7 +38,7 @@ public class Main {
                     menuLoginMahasiswa();
                     break;
                 case 2:
-                    System.out.println("\n[INFO] Fitur Dosen sedang dibangun...");
+                    menuLoginDosen();
                     break;
                 case 3:
                     System.out.println("\n[INFO] Fitur Admin sedang dibangun...");
@@ -137,6 +138,73 @@ public class Main {
                     isDashboardRunning = false;
                     break;
 
+                default:
+                    System.out.println("[ERROR] Pilihan tidak valid!");
+            }
+        }
+    }
+
+    /**
+     * Method untuk menangani alur login Dosen
+     */
+    private static void menuLoginDosen() {
+        System.out.print("\nMasukkan NIP Anda: ");
+        String nipInput = scanner.nextLine();
+
+        System.out.println("Mencari data dosen di database...");
+
+        Dosen dosen = userDAO.getDosenByNip(nipInput);
+
+        if (dosen != null) {
+            System.out.println("Login Berhasil!");
+            dashboardDosen(dosen);
+        } else {
+            System.out.println("[ERROR] NIP tidak terdaftar!");
+        }
+    }
+
+    /**
+     * Dashboard Dosen setelah berhasil login
+     */
+    private static void dashboardDosen(Dosen dosen) {
+        boolean isDashboardRunning = true;
+
+        while (isDashboardRunning) {
+            System.out.println("\n===== DASHBOARD DOSEN =====");
+            System.out.println("Selamat datang, Bapak/Ibu " + dosen.getNama() + "!");
+            System.out.println("NIP         : " + dosen.getNip());
+            System.out.println("---------------------------");
+            System.out.println("[1]. Lihat & Proses Pengajuan Izin Mahasiswa");
+            System.out.println("[0]. Logout");
+            System.out.print("Pilih menu: ");
+
+            int opsi = scanner.nextInt();
+            scanner.nextLine();
+
+            switch (opsi) {
+                case 1:
+                    System.out.println("\n--- DAFTAR PENGAJUAN IZIN (MENUNGGU PERSETUJUAN) ---");
+                    izinDAO.tampilkanIzinPending(dosen.getId());
+
+                    System.out.print("\nApakah Anda ingin memproses izin sekarang? (Y/N): ");
+                    String proses = scanner.nextLine();
+
+                    if (proses.equalsIgnoreCase("Y")) {
+                        System.out.print("Masukkan ID izin: ");
+                        int idIzin = scanner.nextInt();
+                        scanner.nextLine();
+
+                        System.out.print("Masukkan Status Baru (Disetujui / Ditolak): ");
+                        String statusBaru = scanner.nextLine();
+
+                        izinDAO.updateStatusIzin(idIzin, statusBaru);
+                    }
+                    break;
+                case 0:
+                    System.out.println("Logout berhasil. Kembali ke menu utama...");
+                    isDashboardRunning = false;
+                    break;
+                    
                 default:
                     System.out.println("[ERROR] Pilihan tidak valid!");
             }

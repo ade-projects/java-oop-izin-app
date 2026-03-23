@@ -7,6 +7,7 @@ import com.pnc.izin.entity.IzinPenting;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class IzinDAO {
@@ -45,6 +46,70 @@ public class IzinDAO {
 
         } catch (SQLException e) {
             System.out.println("[ERROR] Gagal menyimpan pengajuan izin: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Method untuk menampilkan daftar izin yang masih "Menunggu Dosen Wali"
+     * khusus untuk mahasiswa yang dibimbing oleh dosen tertentu.
+     */
+    public void tampilkanIzinPending(int idDosenWali) {
+        String sql = "SELECT p.id, u.nama, u.nim, p.tanggal, p.durasi_hari, p.jenis_izin, p.status " +
+                     "FROM pengajuan_izin p " +
+                     "JOIN user u ON p.id_mahasiswa = u.id " +
+                     "WHERE u.id_dosen_wali = ? AND p.status = 'Menunggu Dosen Wali'";
+
+        try (Connection conn = DatabaseHelper.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, idDosenWali);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                System.out.println("\n===== DAFTAR PENGAJUAN IZIN (PENDING) =====");
+                boolean adaData = false;
+
+                while (rs.next()) {
+                    adaData = true;                                    
+                    System.out.println("ID Izin   : " + rs.getInt("id"));
+                    System.out.println("Mahasiswa : " + rs.getString("nama") + " (" + rs.getString("nim") + ")");
+                    System.out.println("Tanggal   : " + rs.getString("tanggal"));
+                    System.out.println("Durasi    : " + rs.getInt("durasi_hari") + " hari");
+                    System.out.println("Jenis Izin: " + rs.getString("jenis_izin"));
+                    System.out.println("---------------------------------------");
+                }
+
+                if (!adaData) {
+                    System.out.println("Tidak ada pengajuan izin baru.");
+                }
+            }
+
+        } catch (SQLException e) {
+            System.out.println("[DB ERROR] Gagal mengambil data izin pending: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Method untuk meng-update status izin (Approve / Reject) di database.
+     */
+    public void updateStatusIzin(int idIzin, String statusBaru) {
+        String sql = "UPDATE pengajuan_izin SET status = ? WHERE id = ?";
+
+        try (Connection conn = DatabaseHelper.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, statusBaru);
+            pstmt.setInt(2, idIzin);
+
+            int barisBerubah = pstmt.executeUpdate();
+            
+            if (barisBerubah > 0) {
+                System.out.println("[DB SUCCESS] Status izin ID " + idIzin + " berhasil diubah menjadi: " + statusBaru);
+            } else {
+                System.out.println("[DB WARNING] ID Izin tidak ditemukan!");
+            }
+
+        } catch (SQLException e) {
+            System.out.println("[DB ERROR] Gagal mengupdate status izin: " + e.getMessage());
         }
     }
 }
