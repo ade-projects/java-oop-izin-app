@@ -70,7 +70,6 @@ public class Main {
         } else {
             System.out.println("[ERROR] NIM tidak terdaftar!");
         }
-
     }
 
     /**
@@ -187,21 +186,22 @@ public class Main {
 
             switch (opsi) {
                 case 1:
-                    // System.out.println("\n--- DAFTAR PENGAJUAN IZIN (MENUNGGU PERSETUJUAN) ---");
                     izinDAO.tampilkanIzinPending(dosen.getId());
 
                     System.out.print("\nApakah Anda ingin memproses izin sekarang? (Y/N): ");
                     String proses = scanner.nextLine();
 
                     if (proses.equalsIgnoreCase("Y")) {
-                        System.out.print("Masukkan ID izin: ");
-                        int idIzin = scanner.nextInt();
-                        scanner.nextLine();
-
-                        System.out.print("Masukkan Status Baru (Disetujui / Ditolak): ");
-                        String statusBaru = scanner.nextLine();
-
-                        izinDAO.updateStatusIzin(idIzin, statusBaru);
+                        if (dosen.approveIzin()) {
+                            System.out.print("Masukkan ID izin: ");
+                            int idIzin = scanner.nextInt();
+                            scanner.nextLine();
+    
+                            System.out.print("Masukkan Status Baru (Disetujui / Ditolak): ");
+                            String statusBaru = scanner.nextLine();
+    
+                            izinDAO.updateStatusIzin(idIzin, statusBaru);
+                        }
                     }
                     break;
                 case 0:

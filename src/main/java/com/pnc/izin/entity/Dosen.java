@@ -41,8 +41,16 @@ public class Dosen extends User {
     }
 
     // --- METHOD BEHAVIOR ---
-    public void approveIzin() {
+    public boolean approveIzin() {
         System.out.println("[DOSEN] Mengecek wewenang untuk menyetujui izin...");
+
+        if (this.isDosenWali || this.isKoorProdi) {
+            System.out.println("[SYSTEM] Wewenang terverifikasi. Anda berhak memproses pengajuan izin.");
+            return true;
+        } else {
+            System.out.println("[REJECT] Akses ditolak! Anda bukan Dosen Wali atau Koordinator Prodi.");
+            return false;
+        }
     }
 
     @Override
