@@ -79,11 +79,11 @@ public class Main {
         boolean isDashboardRunning = true;
 
         while (isDashboardRunning) {
-            System.out.println("\n=== DASHBOARD MAHASISWA ===");
+            System.out.println("\n===== DASHBOARD MAHASISWA =====");
             System.out.println("Selamat datang, " + mhs.getNama() + "!");
             System.out.println("NIM         : " + mhs.getNim());
             System.out.println("Total Alpa  : " + mhs.getTotalJamAlpa() + " jam");
-            System.out.println("---------------------------");
+            System.out.println("-------------------------------");
             System.out.println("[1] Ajukan Izin Sakit");
             System.out.println("[2] Ajukan Izin Penting");
             System.out.println("[3] Lihat Riwayat Izin");
@@ -175,10 +175,16 @@ public class Main {
         while (isDashboardRunning) {
             System.out.println("\n===== DASHBOARD DOSEN =====");
             System.out.println("Selamat datang, Bapak/Ibu " + dosen.getNama() + "!");
-            System.out.println("NIP         : " + dosen.getNip());
+            dosen.tampilkanProfil();
             System.out.println("---------------------------");
-            System.out.println("[1]. Lihat & Proses Pengajuan Izin Mahasiswa");
-            System.out.println("[0]. Logout");
+
+            if (dosen.isDosenWali()) {
+                System.out.println("[1] Proses Antrean Izin Dosen Wali");
+            }
+            if (dosen.isKoorProdi()) {
+                System.err.println("[2] Proses Antrean Izin Koordinator Prodi");
+            }
+            System.out.println("[0] Logout");
             System.out.print("Pilih menu: ");
 
             int opsi = scanner.nextInt();
@@ -186,24 +192,56 @@ public class Main {
 
             switch (opsi) {
                 case 1:
-                    izinDAO.tampilkanIzinPending(dosen.getId());
+                    if (!dosen.isDosenWali()) {
+                        System.out.println("[ERROR] Anda bukan Dosen Wali!");
+                        break;
+                    }
 
-                    System.out.print("\nApakah Anda ingin memproses izin sekarang? (Y/N): ");
+                    izinDAO.tampilkanIzinPending(dosen.getId());
+                    System.out.print("\nApakah Anda ingin memproses izin sekarang? (Y/n): ");
                     String proses = scanner.nextLine();
 
                     if (proses.equalsIgnoreCase("Y")) {
-                        if (dosen.approveIzin()) {
-                            System.out.print("Masukkan ID izin: ");
-                            int idIzin = scanner.nextInt();
-                            scanner.nextLine();
-    
-                            System.out.print("Masukkan Status Baru (Disetujui / Ditolak): ");
-                            String statusBaru = scanner.nextLine();
-    
+                        System.out.print("Masukkan ID izin: ");
+                        int idIzin = scanner.nextInt();
+                        scanner.nextLine();
+
+                        System.out.print("Setujui izin ini? (Y/n): ");
+                        boolean isDisetujui = scanner.nextLine().equalsIgnoreCase("Y");
+
+                        if (!isDisetujui) {
+                            izinDAO.updateStatusIzin(idIzin, "Ditolak");
+                        } else {
+                            int durasi = izinDAO.getDurasiIzin(idIzin);
+                            String statusBaru = dosen.tentukanStatusDariWali(durasi);
+
                             izinDAO.updateStatusIzin(idIzin, statusBaru);
                         }
                     }
                     break;
+                
+                case 2:
+                    if (!dosen.isKoorProdi()) {
+                        System.out.println("[ERROR] Anda bukan Koordinator Prodi!");
+                        break;
+                    }
+
+                    izinDAO.tampilkanIzinPendingKoorprodi();
+                    System.out.print("\nApakah Anda ingin memproses izin sekarang? (Y/n): ");
+                    if (scanner.nextLine().equalsIgnoreCase("Y")) {
+                        System.out.print("Masukkan ID izin: ");
+                        int idIzin = scanner.nextInt();
+                        scanner.nextLine();
+
+                        System.out.print("Setujui izin ini secara final? (Y/n): ");
+                        if (scanner.nextLine().equalsIgnoreCase("Y")) {
+                            izinDAO.updateStatusIzin(idIzin, "Disetujui");
+                        } else {
+                            izinDAO.updateStatusIzin(idIzin, "Ditolak");
+                        }
+                    }
+                    break;
+
                 case 0:
                     System.out.println("Logout berhasil. Kembali ke menu utama...");
                     isDashboardRunning = false;

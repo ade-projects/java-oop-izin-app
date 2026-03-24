@@ -144,4 +144,58 @@ public class IzinDAO {
             System.out.println("[DB ERROR] Gagal mengupdate status izin: " + e.getMessage());
         }
     }
+
+    /**
+     * Method untuk menampilkan daftar izin antrean Koordinator Prodi
+     */
+    public void tampilkanIzinPendingKoorprodi() {
+        String sql = "SELECT p.id, u.nama, u.nim, p.tanggal, p.durasi_hari, p.jenis_izin, p.status " +
+                     "FROM pengajuan_izin p " + 
+                     "JOIN user u ON p.id_mahasiswa = u.id " +
+                     "WHERE p.status = 'Menunggu Koorprodi'";
+
+        try (Connection conn = DatabaseHelper.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            
+            System.out.println("\n===== ANTREAN IZIN KOORDINATOR PRODI =====");
+            boolean adaData = false;
+
+            while (rs.next()) {
+                adaData = true;
+                System.out.println("ID Izin     : " + rs.getInt("id"));
+                System.out.println("Mahasiswa   : " + rs.getString("nama") + " (" + rs.getString("nim") + ")");
+                System.out.println("Tanggal     : " + rs.getString("tanggal"));
+                System.out.println("Durasi      : " + rs.getInt("durasi_hari") + " hari");
+                System.out.println("Jenis Izin  : " + rs.getString("jenis_izin"));
+                System.out.println("-----------------------------------------");
+            }
+
+            if (!adaData) {
+                System.out.println("Tidak ada pengajuan izin yang menunggu Koorprodi.");
+            }
+        } catch (Exception e) {
+            System.out.println("[DB ERROR] Gagal mengambil antrean Koorprodi: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Method Helper untuk mengambil durasi hari dari sebuah izin
+     */
+    public int getDurasiIzin(int idIzin) {
+        String sql = "SELECT durasi_hari FROM pengajuan_izin WHERE id = ?";
+        try (Connection conn = DatabaseHelper.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setInt(1, idIzin);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("durasi_hari");
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("[DB ERROR] Gagal mengecek durasi izin: " + e.getMessage());
+        }
+        return 0;
+    }
 }

@@ -41,15 +41,13 @@ public class Dosen extends User {
     }
 
     // --- METHOD BEHAVIOR ---
-    public boolean approveIzin() {
-        System.out.println("[DOSEN] Mengecek wewenang untuk menyetujui izin...");
-
-        if (this.isDosenWali || this.isKoorProdi) {
-            System.out.println("[SYSTEM] Wewenang terverifikasi. Anda berhak memproses pengajuan izin.");
-            return true;
+    public String tentukanStatusDariWali(int durasiHari) {
+        if (durasiHari > 1) {
+            System.out.println("[SYSTEM DOSEN] Durasi lebih dari 1 hari. Meneruskan ke Koordinator Prodi...");
+            return "Menunggu Koorprodi";
         } else {
-            System.out.println("[REJECT] Akses ditolak! Anda bukan Dosen Wali atau Koordinator Prodi.");
-            return false;
+            System.out.println("[SYSTEM DOSEN] Durasi 1 hari. Persetujuan final diberikan.");
+            return "Disetujui";
         }
     }
 
