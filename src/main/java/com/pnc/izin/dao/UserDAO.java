@@ -1,6 +1,7 @@
 package com.pnc.izin.dao;
 
 import com.pnc.izin.config.DatabaseHelper;
+import com.pnc.izin.entity.Admin;
 import com.pnc.izin.entity.Dosen;
 import com.pnc.izin.entity.Mahasiswa;
 
@@ -119,5 +120,94 @@ public class UserDAO {
             System.out.println("[DB ERROR] Gagal mengambil data dosen: " + e.getMessage());
         }
         return dosen;
+    }
+
+    /**
+     * Menyimpan data Admin baru ke database
+     */
+    public void tambahAdmin(Admin admin) {
+        String sql = "INSERT INTO user (nama, role, nip) VALUES (?, ?, ?)";
+        try (Connection conn = DatabaseHelper.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setString(1, admin.getNama());
+            pstmt.setString(2, admin.getRole());
+            pstmt.setString(3, admin.getNip());
+            
+            pstmt.executeUpdate();
+            System.out.println("[DB SUCCESS] Data Admin (" + admin.getNama() + ") berhasil disimpan!");
+        } catch (SQLException e) {
+            System.out.println("[DB ERROR] Gagal menyimpan data admin: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Mencari Admin berdasarkan NIP untuk fitur Login
+     */
+    public Admin getAdminByNip(String nipInput) {
+        String sql = "SELECT * FROM user WHERE role = 'Admin' AND nip = ?";
+        Admin admin = null;
+        try (Connection conn = DatabaseHelper.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setString(1, nipInput);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    admin = new Admin(
+                        rs.getInt("id"), 
+                        rs.getString("nama"), 
+                        rs.getString("role"), 
+                        rs.getString("nip")
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("[DB ERROR] Gagal mengambil data admin: " + e.getMessage());
+        }
+        return admin;
+    }
+
+    /**
+     * Menampilkan seluruh pengguna yang ada di sistem (Read All)
+     */
+    public void tampilkanSemuaUser() {
+        String sql = "SELECT id, nama, role, nim, nip FROM user";
+        try (Connection conn = DatabaseHelper.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            
+            System.out.println("\n=== DAFTAR SELURUH PENGGUNA SISTEM ===");
+            System.out.printf("%-5s | %-30s | %-15s | %-15s\n", "ID", "NAMA", "ROLE", "IDENTITAS (NIM/NIP)");
+            System.out.println("-----------------------------------------------------------------");
+            
+            while (rs.next()) {
+                String identitas = rs.getString("role").equals("Mahasiswa") ? rs.getString("nim") : rs.getString("nip");
+                System.out.printf("%-5d | %-30s | %-15s | %-15s\n", 
+                    rs.getInt("id"), rs.getString("nama"), rs.getString("role"), identitas);
+            }
+        } catch (SQLException e) {
+            System.out.println("[DB ERROR] Gagal menampilkan data pengguna: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Menghapus pengguna dari database berdasarkan ID (Delete)
+     */
+    public void hapusUser(int idUser) {
+        String sql = "DELETE FROM user WHERE id = ?";
+        try (Connection conn = DatabaseHelper.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setInt(1, idUser);
+            int barisTerhapus = pstmt.executeUpdate();
+            
+            if (barisTerhapus > 0) {
+                System.out.println("[DB SUCCESS] Pengguna dengan ID " + idUser + " berhasil dihapus dari sistem!");
+            } else {
+                System.out.println("[DB WARNING] Pengguna dengan ID " + idUser + " tidak ditemukan.");
+            }
+        } catch (SQLException e) {
+            System.out.println("[DB ERROR] Gagal menghapus pengguna: " + e.getMessage());
+        }
     }
 }

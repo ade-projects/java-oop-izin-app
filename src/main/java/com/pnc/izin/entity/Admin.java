@@ -21,21 +21,21 @@ public class Admin extends User {
     }
     
     // --- METHOD BEHAVIOR (STUB) ---
-    public void tambahPengguna() {
-        System.out.println("[ADMIN] Membuka menu tambah pengguna...");
-    }
+    // public void tambahPengguna() {
+    //     System.out.println("[ADMIN] Membuka menu tambah pengguna...");
+    // }
 
-    public void tampilkanPengguna() {
-        System.out.println("[ADMIN] Menampilkan seluruh daftar pengguna sistem...");
-    }
+    // public void tampilkanPengguna() {
+    //     System.out.println("[ADMIN] Menampilkan seluruh daftar pengguna sistem...");
+    // }
 
-    public void updatePengguna() {
-        System.out.println("[ADMIN] Membuka menu update data pengguna...");
-    }
+    // public void updatePengguna() {
+    //     System.out.println("[ADMIN] Membuka menu update data pengguna...");
+    // }
 
-    public void hapusPengguna() {
-        System.out.println("[ADMIN] Membuka menu hapus pengguna...");
-    }
+    // public void hapusPengguna() {
+    //     System.out.println("[ADMIN] Membuka menu hapus pengguna...");
+    // }
 
     @Override
     public void tampilkanProfil() {

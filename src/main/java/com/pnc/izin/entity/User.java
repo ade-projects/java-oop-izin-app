@@ -48,6 +48,4 @@ public class User {
         System.out.println("Nama        : " + nama);
         System.out.println("Role        : " + role);
     }
-
-    
 }

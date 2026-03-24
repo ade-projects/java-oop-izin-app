@@ -3,6 +3,7 @@ package com.pnc.izin;
 import com.pnc.izin.config.DatabaseHelper;
 import com.pnc.izin.dao.UserDAO;
 import com.pnc.izin.dao.IzinDAO;
+import com.pnc.izin.entity.Admin;
 import com.pnc.izin.entity.Dosen;
 import com.pnc.izin.entity.IzinPenting;
 import com.pnc.izin.entity.IzinSakit;
@@ -41,7 +42,7 @@ public class Main {
                     menuLoginDosen();
                     break;
                 case 3:
-                    System.out.println("\n[INFO] Fitur Admin sedang dibangun...");
+                    menuLoginAdmin();
                     break;
                 case 0:
                     System.out.println("\nTerima kasih telah menggunakan sistem ini. Sampai jumpa!");
@@ -182,7 +183,7 @@ public class Main {
                 System.out.println("[1] Proses Antrean Izin Dosen Wali");
             }
             if (dosen.isKoorProdi()) {
-                System.err.println("[2] Proses Antrean Izin Koordinator Prodi");
+                System.out.println("[2] Proses Antrean Izin Koordinator Prodi");
             }
             System.out.println("[0] Logout");
             System.out.print("Pilih menu: ");
@@ -247,6 +248,71 @@ public class Main {
                     isDashboardRunning = false;
                     break;
                     
+                default:
+                    System.out.println("[ERROR] Pilihan tidak valid!");
+            }
+        }
+    }
+
+    /**
+     * Method untuk menangani alur login Admin
+     */
+    private static void menuLoginAdmin() {
+        System.out.print("\nMasukkan NIP Admin: ");
+        String nipInput = scanner.nextLine();
+        System.out.println("Mencari data admin di database...");
+
+        Admin admin = userDAO.getAdminByNip(nipInput);
+
+        if (admin != null) {
+            System.out.println("Login Berhasil!");
+            dashboardAdmin(admin);
+        } else {
+            System.out.println("[ERROR] Kredensial Admin tidak valid!");
+        }
+    }
+
+    /**
+     * Dashboard Admin setelah berhasil login
+     */
+    private static void dashboardAdmin(Admin admin) {
+        boolean isDashboardRunning = true;
+
+        while (isDashboardRunning) {
+            System.out.println("\n===== DASHBOARD ADMIN =====");
+            System.out.println("Login sebagai : " + admin.getNama());
+            System.out.println("---------------------------");
+            System.out.println("[1] Lihat Semua Pengguna");
+            System.out.println("[2] Hapus Pengguna");
+            System.out.println("[0] Logout");
+            System.out.print("Pilih menu: ");
+
+            int pilihan = scanner.nextInt();
+            scanner.nextLine(); 
+
+            switch (pilihan) {
+                case 1:
+                    userDAO.tampilkanSemuaUser();
+                    
+                    break;
+                case 2:
+                    userDAO.tampilkanSemuaUser();
+                    System.out.print("\nMasukkan ID Pengguna yang ingin dihapus (atau 0 untuk batal): ");
+                    int idHapus = scanner.nextInt();
+                    scanner.nextLine();
+                    
+                    if (idHapus != 0) {
+                        System.out.print("Yakin ingin menghapus user ID " + idHapus + "? (Y/N): ");
+                        if (scanner.nextLine().equalsIgnoreCase("Y")) {
+                            userDAO.hapusUser(idHapus);
+                        } else {
+                            System.out.println("Penghapusan dibatalkan.");
+                        }
+                    }
+                    break;
+                case 0:
+                    isDashboardRunning = false;
+                    break;
                 default:
                     System.out.println("[ERROR] Pilihan tidak valid!");
             }
