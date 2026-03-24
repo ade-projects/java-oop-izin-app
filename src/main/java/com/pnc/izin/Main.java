@@ -87,6 +87,7 @@ public class Main {
             System.out.println("---------------------------");
             System.out.println("[1] Ajukan Izin Sakit");
             System.out.println("[2] Ajukan Izin Penting");
+            System.out.println("[3] Lihat Riwayat Izin");
             System.out.println("[0] Logout");
             System.out.print("Pilih menu: ");
 
@@ -133,6 +134,9 @@ public class Main {
                     }
                     break;
 
+                case 3:
+                    izinDAO.tampilkanRiwayatIzin(mhs.getId());
+                    break;
                 case 0:
                     System.out.println("Logout berhasil. Kembali ke menu utama...");
                     isDashboardRunning = false;
@@ -183,7 +187,7 @@ public class Main {
 
             switch (opsi) {
                 case 1:
-                    System.out.println("\n--- DAFTAR PENGAJUAN IZIN (MENUNGGU PERSETUJUAN) ---");
+                    // System.out.println("\n--- DAFTAR PENGAJUAN IZIN (MENUNGGU PERSETUJUAN) ---");
                     izinDAO.tampilkanIzinPending(dosen.getId());
 
                     System.out.print("\nApakah Anda ingin memproses izin sekarang? (Y/N): ");

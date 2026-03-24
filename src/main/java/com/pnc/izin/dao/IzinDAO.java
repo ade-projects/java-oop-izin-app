@@ -50,6 +50,38 @@ public class IzinDAO {
     }
 
     /**
+     * Method untuk melihat riwayat izin milik satu mahasiswa.
+     */
+    public void tampilkanRiwayatIzin(int idMahasiswa) {
+        String sql = "SELECT * FROM pengajuan_izin WHERE id_mahasiswa = ?";
+
+        try (Connection conn = DatabaseHelper.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setInt(1, idMahasiswa);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                System.out.println("\n===== RIWAYAT PENGAJUAN IZIN =====");
+                boolean adaData = false;
+
+                while (rs.next()) {
+                    adaData = true;
+                    System.out.println("ID Izin     : " + rs.getInt("id"));
+                    System.out.println("Tanggal     : " + rs.getString("tanggal"));
+                    System.out.println("Durasi      : " + rs.getInt("durasi_hari") + " hari");
+                    System.out.println("Jenis       : " + rs.getString("jenis_izin"));
+                    System.out.println("Status      : " + rs.getString("status"));
+                    System.out.println("------------------------------");
+                }
+                if (!adaData) {
+                    System.out.println("Anda belum pernah mengajukan izin.");
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("[DB ERROR] Gagal mengambil riwayat izin: " + e.getMessage());
+        }
+    }
+
+    /**
      * Method untuk menampilkan daftar izin yang masih "Menunggu Dosen Wali"
      * khusus untuk mahasiswa yang dibimbing oleh dosen tertentu.
      */
