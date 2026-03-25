@@ -55,6 +55,12 @@ public class Mahasiswa extends User {
         return this.totalJamAlpa * 3;
     }
 
+    private String namaDosenWali = "Belum diatur";
+
+    public void setNamaDosenWali(String namaDosenWali) {
+        this.namaDosenWali = namaDosenWali;
+    }
+
     /**
      * Override method dari class induk untuk menampilkan data yang lebih lengkap
      */
@@ -62,7 +68,7 @@ public class Mahasiswa extends User {
     public void tampilkanProfil() {
         super.tampilkanProfil();
         System.out.println("NIM         : " + nim);
-        System.out.println("Dosen Wali  : " + idDosenWali);
+        System.out.println("Dosen Wali  : " + namaDosenWali);
         System.out.println("Alpa        : " + totalJamAlpa + " jam");
         System.out.println("Kompensasi  : " + hitungKompensasi() + " jam");
     }

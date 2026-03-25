@@ -55,6 +55,11 @@ public class UserDAO {
                     int idDosenWali = rs.getInt("id_dosen_wali");
                     int jamAlpa = rs.getInt("total_jam_alpa");
                     mhs = new Mahasiswa(id, nama, role, nim, idDosenWali, jamAlpa);
+
+                    Dosen dosen = getDosenById(idDosenWali);
+                    if (dosen != null) {
+                        mhs.setNamaDosenWali(dosen.getNama());
+                    }
                 }
             }
 
@@ -67,10 +72,8 @@ public class UserDAO {
 
     /**
      * Method khusus untuk menyuntikkan data Dosen ke database.
-     * Kita buat parameter ID manual agar bisa disamakan dengan id_dosen_wali mahasiswa.
      */
     public void tambahDosen(Dosen dosen) {
-        // Perhatikan kita memasukkan 'id' secara manual di sini
         String sql = "INSERT INTO user (nama, role, nip, is_dosen_wali, is_koor_prodi) VALUES (?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DatabaseHelper.getConnection();
@@ -208,6 +211,126 @@ public class UserDAO {
             }
         } catch (SQLException e) {
             System.out.println("[DB ERROR] Gagal menghapus pengguna: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Mengecek role dari sebuah ID untuk menentukan menu update yang tepat
+     */
+    public String getRoleById(int id) {
+        String sql = "SELECT role FROM user WHERE id = ?";
+        try (Connection conn = DatabaseHelper.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, id);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) return rs.getString("role");
+            }
+        } catch (SQLException e) {
+            System.out.println("[DB ERROR] Gagal mengecek role: " + e.getMessage());
+        }
+        return null;
+    }
+
+    /**
+     * Method get by ID
+     */
+    public Mahasiswa getMahasiswaById(int id) {
+        String sql = "SELECT * FROM user WHERE id = ?";
+        try (Connection conn = DatabaseHelper.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, id);
+            try (ResultSet rs = pstmt.executeQuery()){
+                if (rs.next()) {
+                    return new Mahasiswa(
+                        rs.getInt("id"), rs.getString("nama"), rs.getString("role"), rs.getString("nim"), rs.getInt("id_dosen_wali"), rs.getInt("total_jam_alpa"));
+                }
+            } 
+        } catch (SQLException e) {
+            System.out.println("[DB ERROR] Gagal mengambil data Mahasiswa: " + e.getMessage());
+        }
+        return null;
+    }
+
+    public Dosen getDosenById(int id) {
+        String sql = "SELECT * FROM user WHERE id = ?";
+        try (Connection conn = DatabaseHelper.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, id);
+            try (ResultSet rs = pstmt.executeQuery()){
+                if (rs.next()) {
+                    return new Dosen(
+                        rs.getInt("id"), rs.getString("nama"), rs.getString("role"), rs.getString("nip"), rs.getInt("is_dosen_wali") == 1, rs.getInt("is_koor_prodi") == 1);
+                }
+            } 
+        } catch (SQLException e) {
+            System.out.println("[DB ERROR] Gagal mengambil data Dosen: " + e.getMessage());
+        }
+        return null;
+    }
+
+    public Admin getAdminById(int id) {
+        String sql = "SELECT * FROM user WHERE id = ?";
+        try (Connection conn = DatabaseHelper.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, id);
+            try (ResultSet rs = pstmt.executeQuery()){
+                if (rs.next()) {
+                    return new Admin(
+                        rs.getInt("id"), rs.getString("nama"), rs.getString("role"), rs.getString("nip"));
+                }
+            } 
+        } catch (SQLException e) {
+            System.out.println("[DB ERROR] Gagal mengambil data Admin: " + e.getMessage());
+        }
+        return null;
+    }
+
+    /**
+     * Method update user
+     */
+    public void updateMahasiswa(Mahasiswa mhs) {
+        String sql = "UPDATE user SET nama = ?, nim = ?, id_dosen_wali = ?,total_jam_alpa = ? WHERE id = ?";
+        try (Connection conn = DatabaseHelper.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql) ) {
+            pstmt.setString(1, mhs.getNama());
+            pstmt.setString(2, mhs.getNim());
+            pstmt.setInt(3, mhs.getIdDosenWali());
+            pstmt.setInt(4, mhs.getTotalJamAlpa());
+            pstmt.setInt(5, mhs.getId());
+            pstmt.executeUpdate();
+            System.out.println("[DB SUCCESS] Data Mahasiswa berhasil diupdate!");
+        } catch (SQLException e) {
+            System.out.println("[DB ERROR] Gagal update data Mahasiswa: " + e.getMessage());
+        }
+    }
+
+    public void updateDosen(Dosen dosen) {
+        String sql = "UPDATE user SET nama = ?, nip = ?, is_dosen_wali = ?,is_koor_prodi = ? WHERE id = ?";
+        try (Connection conn = DatabaseHelper.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql) ) {
+            pstmt.setString(1, dosen.getNama());
+            pstmt.setString(2, dosen.getNip());
+            pstmt.setInt(3, dosen.isDosenWali() ? 1 : 0);
+            pstmt.setInt(4, dosen.isKoorProdi() ? 1 : 0) ;
+            pstmt.setInt(5, dosen.getId());
+            pstmt.executeUpdate();
+            System.out.println("[DB SUCCESS] Data Dosen berhasil diupdate!");
+        } catch (SQLException e) {
+            System.out.println("[DB ERROR] Gagal update data Dosen: " + e.getMessage());
+        }
+    }
+
+    public void updateAdmin(Admin admin) {
+        String sql = "UPDATE user SET nama = ?, nip = ? WHERE id = ?";
+        try (Connection conn = DatabaseHelper.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql) ) {
+            pstmt.setString(1, admin.getNama());
+            pstmt.setString(2, admin.getNip());
+            pstmt.setInt(5, admin.getId());
+            pstmt.executeUpdate();
+            System.out.println("[DB SUCCESS] Data Admin berhasil diupdate!");
+        } catch (SQLException e) {
+            System.out.println("[DB ERROR] Gagal update data Admin: " + e.getMessage());
         }
     }
 }

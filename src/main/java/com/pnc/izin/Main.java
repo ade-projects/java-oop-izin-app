@@ -82,8 +82,7 @@ public class Main {
         while (isDashboardRunning) {
             System.out.println("\n===== DASHBOARD MAHASISWA =====");
             System.out.println("Selamat datang, " + mhs.getNama() + "!");
-            System.out.println("NIM         : " + mhs.getNim());
-            System.out.println("Total Alpa  : " + mhs.getTotalJamAlpa() + " jam");
+            mhs.tampilkanProfil();
             System.out.println("-------------------------------");
             System.out.println("[1] Ajukan Izin Sakit");
             System.out.println("[2] Ajukan Izin Penting");
@@ -284,6 +283,8 @@ public class Main {
             System.out.println("---------------------------");
             System.out.println("[1] Lihat Semua Pengguna");
             System.out.println("[2] Hapus Pengguna");
+            System.out.println("[3] Tambah Pengguna");
+            System.out.println("[4] Update Pengguna");
             System.out.println("[0] Logout");
             System.out.print("Pilih menu: ");
 
@@ -293,7 +294,6 @@ public class Main {
             switch (pilihan) {
                 case 1:
                     userDAO.tampilkanSemuaUser();
-                    
                     break;
                 case 2:
                     userDAO.tampilkanSemuaUser();
@@ -308,6 +308,111 @@ public class Main {
                         } else {
                             System.out.println("Penghapusan dibatalkan.");
                         }
+                    }
+                    break;
+                case 3:
+                    System.out.println("\n---- TAMBAH PENGGUNA BARU -----");
+                    System.out.println("Pilih role:\n[1] Mahasiswa\n[2] Dosen\n[3] Admin ");
+                    System.out.print("Pilihan: ");
+                    int roleBaru = scanner.nextInt();
+                    scanner.nextLine();
+
+                    System.out.print("Nama Lengkap: ");
+                    String namaBaru = scanner.nextLine();
+
+                    if (roleBaru == 1) {
+                        System.out.print("NIM: ");
+                        String nimBaru = scanner.nextLine();
+                        System.out.print("ID Dosen Wali: ");
+                        int idWali = scanner.nextInt();
+                        scanner.nextLine();
+                        Mahasiswa mhsBaru = new Mahasiswa(0, namaBaru, "Mahasiswa", nimBaru, idWali, 0);
+                        userDAO.tambahMahasiswa(mhsBaru);
+                    } else if (roleBaru == 2) {
+                        System.out.print("NIP: ");
+                        String nipBaru = scanner.nextLine();
+                        System.out.print("Apakah Dosen Wali? (Y/n): ");
+                        boolean isWali = scanner.nextLine().equalsIgnoreCase("Y");
+                        System.out.print("Apakah Koordinator Prodi? (Y/n): ");
+                        boolean isKoor = scanner.nextLine().equalsIgnoreCase("Y");
+                        Dosen dosenBaru = new Dosen(0, namaBaru, "Dosen", nipBaru, isWali, isKoor);
+                        userDAO.tambahDosen(dosenBaru);
+                    } else if (roleBaru == 3) {
+                        System.out.print("NIP Admin: ");
+                        String nipAdmin = scanner.nextLine();
+                        Admin adminBaru = new Admin(0, namaBaru, "Admin", nipAdmin);
+                        userDAO.tambahAdmin(adminBaru);
+                    }
+                    break;
+                case 4:
+                    System.out.println("\n----- UPDATE DATA PENGGUNA -----");
+                    userDAO.tampilkanSemuaUser();
+                    System.out.print("\nMasukkan ID Pengguna yang ingin diupdate (0 untuk batal): ");
+                    int idUpdate = scanner.nextInt();
+                    scanner.nextLine();
+
+                    if (idUpdate == 0) break; 
+                    String targetRole = userDAO.getRoleById(idUpdate);
+                    if (targetRole == null) {
+                        System.out.println("[ERROR] ID tidak ditemukan!");
+                        break;
+                    }
+
+                    System.out.println("Mengedit user dengan role: " + targetRole);
+                    System.out.println("(Biarkan kosong / tekan enter jika tidak ingin mengubah data teks)");
+
+                    if (targetRole.equals("Mahasiswa")) {
+                        Mahasiswa m = userDAO.getMahasiswaById(idUpdate);
+                        Mahasiswa mhs = userDAO.getMahasiswaByNim(m.getNim());
+
+                        System.out.print("Nama baru [" + m.getNama() + "]: ");
+                        String uNama = scanner.nextLine();
+                        if (!uNama.isEmpty()) m.setNama(uNama);
+
+                        System.out.print("NIM baru [" + m.getNim() + "]: ");
+                        String uNim = scanner.nextLine();
+                        if (!uNim.isEmpty()) m.setNim(uNim);
+
+                        System.out.print("Jam Alpa baru [Saat ini: " + m.getTotalJamAlpa() + "]: ");
+
+                        String uAlpaStr = scanner.nextLine();
+                        if (!uAlpaStr.isEmpty()) {
+                            try {
+                                int alpaBaru = Integer.parseInt(uAlpaStr);
+                                m.setTotalJamAlpa(alpaBaru);
+                            } catch (NumberFormatException e) {
+                                System.out.println("[ERROR] Input Jam Alpa harus berupa angka! Perubahan alpa dibatalkan.");
+                            }
+                        }
+
+                        userDAO.updateMahasiswa(m);
+
+                        System.out.println("\n----- EVALUASI DATA MAHASISWA -----");
+                        mhs.tampilkanProfil();
+                    } else if (targetRole.equals("Dosen")) {
+                        Dosen d = userDAO.getDosenById(idUpdate);
+
+                        System.out.print("Nama baru [" + d.getNama() + "]: ");
+                        String uNamaDosen = scanner.nextLine();
+                        if (!uNamaDosen.isEmpty()) d.setNama(uNamaDosen);
+
+                        System.out.print("NIP baru [" + d.getNip() + "]: ");
+                        String uNipDosen = scanner.nextLine();
+                        if (!uNipDosen.isEmpty()) d.setNip(uNipDosen);
+
+                        userDAO.updateDosen(d);
+                    } else if (targetRole.equals("Admin")) {
+                        Admin a = userDAO.getAdminById(idUpdate);
+                        
+                        System.out.print("Nama baru [" + a.getNama() + "]: ");
+                        String uNamaAdmin = scanner.nextLine();
+                        if (!uNamaAdmin.isEmpty()) a.setNama(uNamaAdmin);
+                        
+                        System.out.print("NIP baru [" + a.getNip() + "]: ");
+                        String uNipAdmin = scanner.nextLine();
+                        if (!uNipAdmin.isEmpty()) a.setNip(uNipAdmin);
+                        
+                        userDAO.updateAdmin(a);
                     }
                     break;
                 case 0:
