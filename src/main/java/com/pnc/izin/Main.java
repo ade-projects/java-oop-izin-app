@@ -59,6 +59,9 @@ public class Main {
      * Method untuk menangani alur login Mahasiswa
      */
     private static void menuLoginMahasiswa() {
+        // tampil user demo
+        userDAO.tampilkanUserDemo("Mahasiswa");
+        
         System.out.print("\nMasukkan NIM Anda: ");
         String nimInput = scanner.nextLine();
 
@@ -174,6 +177,9 @@ public class Main {
      * Method untuk menangani alur login Dosen
      */
     private static void menuLoginDosen() {
+        // tampil user demo
+        userDAO.tampilkanUserDemo("Dosen");
+        
         System.out.print("\nMasukkan NIP Anda: ");
         String nipInput = scanner.nextLine();
 
@@ -280,6 +286,9 @@ public class Main {
      * Method untuk menangani alur login Admin
      */
     private static void menuLoginAdmin() {
+        // tampil user demo
+        userDAO.tampilkanUserDemo("Admin");
+        
         System.out.print("\nMasukkan NIP Admin: ");
         String nipInput = scanner.nextLine();
         System.out.println("Mencari data admin di database...");

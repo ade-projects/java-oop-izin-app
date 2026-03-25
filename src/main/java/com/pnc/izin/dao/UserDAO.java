@@ -1,15 +1,15 @@
 package com.pnc.izin.dao;
 
-import com.pnc.izin.config.DatabaseHelper;
-import com.pnc.izin.entity.Admin;
-import com.pnc.izin.entity.Dosen;
-import com.pnc.izin.entity.Mahasiswa;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+
+import com.pnc.izin.config.DatabaseHelper;
+import com.pnc.izin.entity.Admin;
+import com.pnc.izin.entity.Dosen;
+import com.pnc.izin.entity.Mahasiswa;
 
 public class UserDAO {
 
@@ -332,6 +332,48 @@ public class UserDAO {
             System.out.println("[DB SUCCESS] Data Admin berhasil diupdate!");
         } catch (SQLException e) {
             System.out.println("[DB ERROR] Gagal update data Admin: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Method sementara untuk keperluan presentasi (menampilkan akun demo)
+     */
+    public void tampilkanUserDemo(String roleFilter) {
+        String sql = "SELECT * FROM user WHERE role = ?";
+        try (Connection conn = DatabaseHelper.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setString(1, roleFilter);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                System.out.println("\n--- [AKUN DEMO] DAFTAR " + roleFilter.toUpperCase() + " ---");
+                boolean adaData = false;
+                
+                while (rs.next()) {
+                    adaData = true;
+                    String nama = rs.getString("nama");
+                    String identitas = roleFilter.equals("Mahasiswa") ? rs.getString("nim") : rs.getString("nip");
+                    
+                    // Cek jabatan khusus untuk Dosen
+                    String infoJabatan = "";
+                    if (roleFilter.equals("Dosen")) {
+                        boolean isWali = rs.getInt("is_dosen_wali") == 1;
+                        boolean isKoor = rs.getInt("is_koor_prodi") == 1;
+                        if (isWali && isKoor) infoJabatan = " (Dosen Wali & Koorprodi)";
+                        else if (isWali) infoJabatan = " (Dosen Wali)";
+                        else if (isKoor) infoJabatan = " (Koorprodi)";
+                        else infoJabatan = " (Dosen Pengajar)";
+                    }
+                    
+                    System.out.println("- " + nama + " | " + identitas + infoJabatan);
+                }
+                
+                if (!adaData) {
+                    System.out.println("(Belum ada data " + roleFilter + " di database)");
+                }
+                System.out.println("----------------------------------------");
+            }
+        } catch (SQLException e) {
+            System.out.println("[DB ERROR] Gagal memuat user demo: " + e.getMessage());
         }
     }
 }
