@@ -9,6 +9,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 public class UserDAO {
 
@@ -74,7 +75,7 @@ public class UserDAO {
      * Method khusus untuk menyuntikkan data Dosen ke database.
      */
     public void tambahDosen(Dosen dosen) {
-        String sql = "INSERT INTO user (nama, role, nip, is_dosen_wali, is_koor_prodi) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO user (nama, role, nip, is_dosen_wali, is_koor_prodi) VALUES (?, ?, ?, ?, ?)";
 
         try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -173,24 +174,24 @@ public class UserDAO {
     /**
      * Menampilkan seluruh pengguna yang ada di sistem (Read All)
      */
-    public void tampilkanSemuaUser() {
+    public ArrayList<String> getSemuaUserList() {
+        ArrayList<String> listUser = new ArrayList<>();
+
         String sql = "SELECT id, nama, role, nim, nip FROM user";
         try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql);
              ResultSet rs = pstmt.executeQuery()) {
             
-            System.out.println("\n=== DAFTAR SELURUH PENGGUNA SISTEM ===");
-            System.out.printf("%-5s | %-30s | %-15s | %-15s\n", "ID", "NAMA", "ROLE", "IDENTITAS (NIM/NIP)");
-            System.out.println("-----------------------------------------------------------------");
-            
             while (rs.next()) {
                 String identitas = rs.getString("role").equals("Mahasiswa") ? rs.getString("nim") : rs.getString("nip");
-                System.out.printf("%-5d | %-30s | %-15s | %-15s\n", 
+                String dataBaris = String.format("%-5d | %-30s | %-15s | %-15s", 
                     rs.getInt("id"), rs.getString("nama"), rs.getString("role"), identitas);
+                listUser.add(dataBaris);
             }
         } catch (SQLException e) {
             System.out.println("[DB ERROR] Gagal menampilkan data pengguna: " + e.getMessage());
         }
+        return listUser;
     }
 
     /**

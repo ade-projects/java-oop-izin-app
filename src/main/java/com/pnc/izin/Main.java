@@ -10,6 +10,7 @@ import com.pnc.izin.entity.IzinSakit;
 import com.pnc.izin.entity.Mahasiswa;
 
 import java.util.Scanner;
+import java.util.ArrayList;
 
 public class Main {
     private static Scanner scanner = new Scanner(System.in);
@@ -103,7 +104,7 @@ public class Main {
                     int durasiSakit = scanner.nextInt();
                     scanner.nextLine();
 
-                    System.out.print("Ada Surat Dokter? (Y/N): ");
+                    System.out.print("Ada Surat Dokter? (Y/n): ");
                     String jawabDokter = scanner.nextLine();
                     boolean adaSurat = jawabDokter.equalsIgnoreCase("Y");
 
@@ -272,6 +273,26 @@ public class Main {
     }
 
     /**
+     * Method tampil daftar user
+     */
+    private static void tampilkanTabelUser() {
+        System.out.println("\n======================= DAFTAR SELURUH PENGGUNA SISTEM =======================");
+        System.out.printf("%-5s | %-30s | %-15s | %-15s\n", "ID", "NAMA", "ROLE", "IDENTITAS (NIM/NIP)");
+        System.out.println("------------------------------------------------------------------------------");
+
+        ArrayList<String> daftarUser = userDAO.getSemuaUserList();
+        if (daftarUser.isEmpty()) {
+            System.out.println("Belum ada data pengguna di dalam sistem.");
+        } else {
+            for (String userText : daftarUser) {
+                System.out.println(userText);
+            }
+        }
+        System.out.println("------------------------------------------------------------------------------");
+
+    }
+
+    /**
      * Dashboard Admin setelah berhasil login
      */
     private static void dashboardAdmin(Admin admin) {
@@ -293,16 +314,17 @@ public class Main {
 
             switch (pilihan) {
                 case 1:
-                    userDAO.tampilkanSemuaUser();
+                    tampilkanTabelUser();
                     break;
                 case 2:
-                    userDAO.tampilkanSemuaUser();
+                    tampilkanTabelUser();
+
                     System.out.print("\nMasukkan ID Pengguna yang ingin dihapus (atau 0 untuk batal): ");
                     int idHapus = scanner.nextInt();
                     scanner.nextLine();
                     
                     if (idHapus != 0) {
-                        System.out.print("Yakin ingin menghapus user ID " + idHapus + "? (Y/N): ");
+                        System.out.print("Yakin ingin menghapus user ID " + idHapus + "? (Y/n): ");
                         if (scanner.nextLine().equalsIgnoreCase("Y")) {
                             userDAO.hapusUser(idHapus);
                         } else {
@@ -346,7 +368,9 @@ public class Main {
                     break;
                 case 4:
                     System.out.println("\n----- UPDATE DATA PENGGUNA -----");
-                    userDAO.tampilkanSemuaUser();
+
+                    tampilkanTabelUser();
+
                     System.out.print("\nMasukkan ID Pengguna yang ingin diupdate (0 untuk batal): ");
                     int idUpdate = scanner.nextInt();
                     scanner.nextLine();
@@ -363,7 +387,6 @@ public class Main {
 
                     if (targetRole.equals("Mahasiswa")) {
                         Mahasiswa m = userDAO.getMahasiswaById(idUpdate);
-                        Mahasiswa mhs = userDAO.getMahasiswaByNim(m.getNim());
 
                         System.out.print("Nama baru [" + m.getNama() + "]: ");
                         String uNama = scanner.nextLine();
@@ -386,6 +409,8 @@ public class Main {
                         }
 
                         userDAO.updateMahasiswa(m);
+
+                        Mahasiswa mhs = userDAO.getMahasiswaByNim(m.getNim());
 
                         System.out.println("\n----- EVALUASI DATA MAHASISWA -----");
                         mhs.tampilkanProfil();

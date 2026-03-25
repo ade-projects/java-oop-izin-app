@@ -43,7 +43,7 @@ public class User {
      * Method untuk menampilkan profil dasar
      */
     public void tampilkanProfil() {
-        System.out.println("===== PROFIL PENGGUNA =====");
+        System.out.println("\n===== PROFIL PENGGUNA =====");
         System.out.println("ID          : " + id);
         System.out.println("Nama        : " + nama);
         System.out.println("Role        : " + role);
