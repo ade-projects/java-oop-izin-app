@@ -43,7 +43,7 @@ replay_pid*
 .nfs*
 
 ### Maven ###
-target/
+target/*
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup
@@ -79,5 +79,12 @@ buildNumber.properties
 # Ignore all local history of files
 .history
 .ionide
+
+# SQLite DB
+*.db 
+!data_izin.db
+
+# File kompilasi
+!target/uts-pbo-1.0-SNAPSHOT-jar-with-dependencies.jar
 
 # End of https://www.toptal.com/developers/gitignore/api/linux,visualstudiocode,java,maven
