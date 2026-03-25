@@ -124,8 +124,30 @@ public class Main {
                     int durasiPenting = scanner.nextInt();
                     scanner.nextLine();
 
-                    System.out.print("Kategori (Keluarga/Pribadi/Tugas): ");
-                    String kategori = scanner.nextLine();
+                    System.out.println("Pilih Kategori Izin:");
+                    System.out.println("[1] Pribadi");
+                    System.out.println("[2] Keluarga");
+                    System.out.println("[3] Tugas / Dispensasi");
+                    System.out.print("Pilihan (1-3): ");
+
+                    int pilKategori = scanner.nextInt();
+                    scanner.nextLine();
+
+                    String kategori = "";
+                    switch (pilKategori) {
+                        case 1:
+                            kategori = "Pribadi";
+                            break;
+                        case 2:
+                            kategori = "Keluarga";
+                            break;
+                        case 3:
+                            kategori = "Tugas/Dispensasi";
+                            break;
+                        default:
+                            kategori = "Lainnya";
+                            break;
+                    }
 
                     IzinPenting izinPenting = new IzinPenting(0, mhs.getId(), tglPenting, durasiPenting, "Menunggu Dosen Wali", kategori);
 
