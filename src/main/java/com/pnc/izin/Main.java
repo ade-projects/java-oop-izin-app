@@ -237,7 +237,20 @@ public class Main {
                         break;
                     }
 
-                    izinDAO.tampilkanIzinPending(dosen.getId());
+                    System.out.println("\n===== DAFTAR PENGAJUAN IZIN (PENDING) =====\n");
+
+                    ArrayList<PengajuanIzin> antreanWali = izinDAO.getIzinPendingWali(dosen.getId());
+
+                    if (antreanWali.isEmpty()) {
+                        System.out.println("Tidak ada pengajuan izin baru.");
+                        break;
+                    }
+
+                    for (PengajuanIzin izin : antreanWali) {
+                        izin.tampilkanDetail();
+                        System.out.println("---------------------------------------");
+                    }
+
                     System.out.print("\nApakah Anda ingin memproses izin sekarang? (Y/n): ");
                     String proses = scanner.nextLine();
 

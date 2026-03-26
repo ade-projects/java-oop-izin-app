@@ -1,15 +1,15 @@
 package com.pnc.izin.dao;
 
-import com.pnc.izin.config.DatabaseHelper;
-import com.pnc.izin.entity.PengajuanIzin;
-import com.pnc.izin.entity.IzinSakit;
-import com.pnc.izin.entity.IzinPenting;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+
+import com.pnc.izin.config.DatabaseHelper;
+import com.pnc.izin.entity.IzinPenting;
+import com.pnc.izin.entity.IzinSakit;
+import com.pnc.izin.entity.PengajuanIzin;
 
 public class IzinDAO {
 
@@ -88,14 +88,14 @@ public class IzinDAO {
     }
 
     /**
-     * Method untuk menampilkan daftar izin yang masih "Menunggu Dosen Wali"
-     * khusus untuk mahasiswa yang dibimbing oleh dosen tertentu.
+     * Mengambil daftar izin pending untuk Dosen Wali dan memasukkan data nama mahasiswa
      */
-    public void tampilkanIzinPending(int idDosenWali) {
-        String sql = "SELECT p.id, u.nama, u.nim, p.tanggal, p.durasi_hari, p.jenis_izin, p.status " +
-                     "FROM pengajuan_izin p " +
-                     "JOIN user u ON p.id_mahasiswa = u.id " +
-                     "WHERE u.id_dosen_wali = ? AND p.status = 'Menunggu Dosen Wali'";
+    public ArrayList<PengajuanIzin> getIzinPendingWali(int idDosenWali) {
+        ArrayList<PengajuanIzin> daftarIzin = new ArrayList<>();
+       String sql = "SELECT p.*, u.nama, u.nim " +
+                    "FROM pengajuan_izin p " +
+                    "JOIN user u ON p.id_mahasiswa = u.id " +
+                    "WHERE u.id_dosen_wali = ? AND p.status = 'Menunggu Dosen Wali'";
 
         try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -103,27 +103,39 @@ public class IzinDAO {
             pstmt.setInt(1, idDosenWali);
 
             try (ResultSet rs = pstmt.executeQuery()) {
-                System.out.println("\n===== DAFTAR PENGAJUAN IZIN (PENDING) =====");
-                boolean adaData = false;
 
                 while (rs.next()) {
-                    adaData = true;                                    
-                    System.out.println("ID Izin   : " + rs.getInt("id"));
-                    System.out.println("Mahasiswa : " + rs.getString("nama") + " (" + rs.getString("nim") + ")");
-                    System.out.println("Tanggal   : " + rs.getString("tanggal"));
-                    System.out.println("Durasi    : " + rs.getInt("durasi_hari") + " hari");
-                    System.out.println("Jenis Izin: " + rs.getString("jenis_izin"));
-                    System.out.println("---------------------------------------");
-                }
 
-                if (!adaData) {
-                    System.out.println("Tidak ada pengajuan izin baru.");
+                    int id = rs.getInt("id");
+                    int idMahasiswa = rs.getInt("id_mahasiswa");
+                    String tanggal = rs.getString("tanggal");
+                    int durasi = rs.getInt("durasi_hari");
+                    String status = rs.getString("status");
+                    String jenis = rs.getString("jenis_izin");
+
+                    PengajuanIzin izinObj = null;
+
+                    if (jenis.equals("Sakit")) {
+                        boolean adaSurat = rs.getInt("ada_surat_dokter") == 1;
+                        izinObj = new IzinSakit(id, idMahasiswa, tanggal, durasi, status, adaSurat);
+                    } else if (jenis.equals("Penting")){
+                        String kategori = rs.getString("kategori");
+                        izinObj = new IzinPenting(id, idMahasiswa, tanggal, durasi, status, kategori);
+                    }
+
+                    if (izinObj != null) {
+                        izinObj.setNamaMahasiswa(rs.getString("nama"));
+                        izinObj.setNimMahasiswa(rs.getString("nim"));
+
+                        daftarIzin.add(izinObj);
+                    }
                 }
             }
 
         } catch (SQLException e) {
             System.out.println("[DB ERROR] Gagal mengambil data izin pending: " + e.getMessage());
         }
+        return daftarIzin;
     }
 
     /**

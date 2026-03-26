@@ -6,6 +6,8 @@ public class PengajuanIzin {
     protected String tanggal;
     protected int durasiHari;
     protected String status; 
+    protected String namaMahasiswa = "";
+    protected String nimMahasiswa = "";
 
     // Constructor
     public PengajuanIzin() {
@@ -61,15 +63,28 @@ public class PengajuanIzin {
         this.status = status;
     }
 
-    // --- METHOD BEHAVIOR ---
+    public void setNamaMahasiswa(String namaMahasiswa) {
+        this.namaMahasiswa = namaMahasiswa;
+    }
 
+    public void setNimMahasiswa(String nimMahasiswa) {
+        this.nimMahasiswa = nimMahasiswa;
+    }
+    
+    // --- METHOD BEHAVIOR ---
     /**
      * Method untuk menampilkan detail surat izin
      */
     public void tampilkanDetail() {
         System.out.println("===== DETAIL PENGAJUAN IZIN =====");
         System.out.println("ID          : " + id);
-        System.out.println("idMahasiswa : " + idMahasiswa);
+
+        if (!namaMahasiswa.isEmpty()) {
+            System.out.println("Mahasiswa   : " + namaMahasiswa + " (" + nimMahasiswa + ")");
+        } else {
+            System.out.println("ID Mahasiswa    : " + idMahasiswa);
+        }
+
         System.out.println("Tanggal     : " + tanggal);
         System.out.println("Durasi      : " + durasiHari + " hari");
         System.out.println("Status      : " + status);
