@@ -279,7 +279,21 @@ public class Main {
                         break;
                     }
 
-                    izinDAO.tampilkanIzinPendingKoorprodi();
+                    System.out.println("\n===== ANTREAN IZIN KOORDINATOR PRODI =====\n");
+
+                    ArrayList<PengajuanIzin> antreanKoor = izinDAO.getIzinPendingKoorprodi();
+
+                    if (antreanKoor.isEmpty()) {
+                        System.out.println("Tidak ada pengajuan izin yang menunggu Koordinator Prodi.");
+                        break;
+                    }
+
+                    for (PengajuanIzin izin : antreanKoor) {
+                        izin.tampilkanDetail();
+                        System.out.println("-----------------------------------------");
+
+                    }
+
                     System.out.print("\nApakah Anda ingin memproses izin sekarang? (Y/n): ");
                     if (scanner.nextLine().equalsIgnoreCase("Y")) {
                         System.out.print("Masukkan ID izin: ");

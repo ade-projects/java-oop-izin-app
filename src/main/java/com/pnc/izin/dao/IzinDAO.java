@@ -166,8 +166,10 @@ public class IzinDAO {
     /**
      * Method untuk menampilkan daftar izin antrean Koordinator Prodi
      */
-    public void tampilkanIzinPendingKoorprodi() {
-        String sql = "SELECT p.id, u.nama, u.nim, p.tanggal, p.durasi_hari, p.jenis_izin, p.status " +
+    public ArrayList<PengajuanIzin> getIzinPendingKoorprodi() {
+        ArrayList<PengajuanIzin> daftarIzin = new ArrayList<>();
+        
+        String sql = "SELECT p.*, u.nama, u.nim " +
                      "FROM pengajuan_izin p " + 
                      "JOIN user u ON p.id_mahasiswa = u.id " +
                      "WHERE p.status = 'Menunggu Koorprodi'";
@@ -176,25 +178,35 @@ public class IzinDAO {
              PreparedStatement pstmt = conn.prepareStatement(sql);
              ResultSet rs = pstmt.executeQuery()) {
             
-            System.out.println("\n===== ANTREAN IZIN KOORDINATOR PRODI =====");
-            boolean adaData = false;
-
             while (rs.next()) {
-                adaData = true;
-                System.out.println("ID Izin     : " + rs.getInt("id"));
-                System.out.println("Mahasiswa   : " + rs.getString("nama") + " (" + rs.getString("nim") + ")");
-                System.out.println("Tanggal     : " + rs.getString("tanggal"));
-                System.out.println("Durasi      : " + rs.getInt("durasi_hari") + " hari");
-                System.out.println("Jenis Izin  : " + rs.getString("jenis_izin"));
-                System.out.println("-----------------------------------------");
-            }
+                    int id = rs.getInt("id");
+                    int idMahasiswa = rs.getInt("id_mahasiswa");
+                    String tanggal = rs.getString("tanggal");
+                    int durasi = rs.getInt("durasi_hari");
+                    String status = rs.getString("status");
+                    String jenis = rs.getString("jenis_izin");
 
-            if (!adaData) {
-                System.out.println("Tidak ada pengajuan izin yang menunggu Koorprodi.");
+                    PengajuanIzin izinObj = null;
+
+                    if (jenis.equals("Sakit")) {
+                        boolean adaSurat = rs.getInt("ada_surat_dokter") == 1;
+                        izinObj = new IzinSakit(id, idMahasiswa, tanggal, durasi, status, adaSurat);
+                    } else if (jenis.equals("Penting")){
+                        String kategori = rs.getString("kategori");
+                        izinObj = new IzinPenting(id, idMahasiswa, tanggal, durasi, status, kategori);
+
+                    if (izinObj != null) {
+                        izinObj.setNamaMahasiswa(rs.getString("nama"));
+                        izinObj.setNimMahasiswa(rs.getString("nim"));
+
+                        daftarIzin.add(izinObj);
+                    }
+                }
             }
         } catch (Exception e) {
             System.out.println("[DB ERROR] Gagal mengambil antrean Koorprodi: " + e.getMessage());
         }
+        return daftarIzin;
     }
 
     /**
