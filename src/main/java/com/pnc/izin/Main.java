@@ -8,6 +8,7 @@ import com.pnc.izin.entity.Dosen;
 import com.pnc.izin.entity.IzinPenting;
 import com.pnc.izin.entity.IzinSakit;
 import com.pnc.izin.entity.Mahasiswa;
+import com.pnc.izin.entity.PengajuanIzin;
 
 import java.util.Scanner;
 import java.util.ArrayList;
@@ -160,7 +161,17 @@ public class Main {
                     break;
 
                 case 3:
-                    izinDAO.tampilkanRiwayatIzin(mhs.getId());
+                    System.out.println("\n===== RIWAYAT PENGAJUAN IZIN =====\n");
+                    ArrayList<PengajuanIzin> riwayatKu = izinDAO.getRiwayatIzin(mhs.getId());
+
+                    if (riwayatKu.isEmpty()) {
+                        System.out.println("Anda belum pernah mengajukan izin.");
+                    } else {
+                        for (PengajuanIzin izin : riwayatKu) {
+                            izin.tampilkanDetail();
+                            System.out.println("------------------------------");
+                        }
+                    }
                     break;
                 case 0:
                     System.out.println("Logout berhasil. Kembali ke menu utama...");

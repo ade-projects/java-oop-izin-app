@@ -9,6 +9,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 public class IzinDAO {
 
@@ -50,9 +51,10 @@ public class IzinDAO {
     }
 
     /**
-     * Method untuk melihat riwayat izin milik satu mahasiswa.
+     * Method untuk mengambil riwayat izin dan mengembalikannya dalam bentuk ArrayList
      */
-    public void tampilkanRiwayatIzin(int idMahasiswa) {
+    public ArrayList<PengajuanIzin> getRiwayatIzin(int idMahasiswa) {
+        ArrayList<PengajuanIzin> daftarIzin = new ArrayList<>();
         String sql = "SELECT * FROM pengajuan_izin WHERE id_mahasiswa = ?";
 
         try (Connection conn = DatabaseHelper.getConnection();
@@ -60,25 +62,29 @@ public class IzinDAO {
             
             pstmt.setInt(1, idMahasiswa);
             try (ResultSet rs = pstmt.executeQuery()) {
-                System.out.println("\n===== RIWAYAT PENGAJUAN IZIN =====");
-                boolean adaData = false;
 
                 while (rs.next()) {
-                    adaData = true;
-                    System.out.println("ID Izin     : " + rs.getInt("id"));
-                    System.out.println("Tanggal     : " + rs.getString("tanggal"));
-                    System.out.println("Durasi      : " + rs.getInt("durasi_hari") + " hari");
-                    System.out.println("Jenis       : " + rs.getString("jenis_izin"));
-                    System.out.println("Status      : " + rs.getString("status"));
-                    System.out.println("------------------------------");
-                }
-                if (!adaData) {
-                    System.out.println("Anda belum pernah mengajukan izin.");
+                    int id = rs.getInt("id");
+                    String tanggal = rs.getString("tanggal");
+                    int durasi = rs.getInt("durasi_hari");
+                    String status = rs.getString("status");
+                    String jenis = rs.getString("jenis_izin");
+
+                    if (jenis.equals("Sakit")) {
+                        boolean adaSurat = rs.getInt("ada_surat_dokter") == 1;
+                        IzinSakit sakit = new IzinSakit(id, idMahasiswa, tanggal, durasi, status, adaSurat);
+                        daftarIzin.add(sakit);
+                    } else if (jenis.equals("Penting")){
+                        String kategori = rs.getString("kategori");
+                        IzinPenting penting = new IzinPenting(id, idMahasiswa, tanggal, durasi, status, kategori);
+                        daftarIzin.add(penting);
+                    }
                 }
             }
         } catch (Exception e) {
             System.out.println("[DB ERROR] Gagal mengambil riwayat izin: " + e.getMessage());
         }
+        return daftarIzin;
     }
 
     /**
