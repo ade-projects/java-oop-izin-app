@@ -89,12 +89,4 @@ public class PengajuanIzin {
         System.out.println("Durasi      : " + durasiHari + " hari");
         System.out.println("Status      : " + status);
     }
-
-    /**
-     * Method ini nanti akan dipanggil oleh class Dosen untuk mengubah status
-     */
-    public void ubahStatus(String statusBaru) {
-        this.status = statusBaru;
-        System.out.println("Status izin berhasil diubah menjadi: " + this.status);
-    }
 }

@@ -41,14 +41,6 @@ public class Mahasiswa extends User {
     }
 
     /**
-     * Method khusus menambah jam alpa
-     */
-    public void tambahJamAlpa(int jam) {
-        this.totalJamAlpa += jam;
-        System.out.println("[SUCCESS] " + jam + " Jam alpa berhasil ditambahkan.");
-    }
-
-    /**
      * Method menghitung total kompensasi sesuai aturan kampus
      */
     public int hitungKompensasi() {
